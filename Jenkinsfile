@@ -7,9 +7,9 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "ainakshi/devopsdemo"    // Docker image name
-        DOCKER_TAG = "latest"                  // Docker image tag
-        DOCKER_REGISTRY = "docker.io"          // Docker registry
-        KUBE_NAMESPACE = "default"            // Kubernetes namespace
+        DOCKER_TAG = "latest"                   // Docker image tag
+        DOCKER_REGISTRY = "docker.io"           // Docker registry
+        KUBE_NAMESPACE = "default"              // Kubernetes namespace
     }
 
     stages {
@@ -56,31 +56,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Deploy the application to Kubernetes
-                    sh """
-                        kubectl apply -f - <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: devopsdemo
-  namespace: ${KUBE_NAMESPACE}
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: devopsdemo
-  template:
-    metadata:
-      labels:
-        app: devopsdemo
-    spec:
-      containers:
-      - name: devopsdemo
-        image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-        ports:
-        - containerPort: 8080
-EOF
-                    """
+                    // Apply the Kubernetes Deployment and Service YAML files
+                    sh "kubectl apply -f deployment.yaml"
+                    sh "kubectl apply -f service.yaml"
                 }
             }
         }
@@ -88,7 +66,7 @@ EOF
         stage('Expose Kubernetes Service') {
             steps {
                 script {
-                    // Expose the deployment as a service
+                    // Expose the deployment as a service (you can skip this step if it's already in your service.yaml)
                     sh """
                         kubectl expose deployment devopsdemo \
                             --type=LoadBalancer \
