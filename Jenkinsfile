@@ -2,23 +2,23 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK_17' // Name as per your configuration in Jenkins
+        jdk 'JDK_17' // Specify the JDK version as per your Jenkins configuration
     }
 
     environment {
-        DOCKER_IMAGE = "ainakshi/devopsdemo"  // Docker image name
-        DOCKER_TAG = "latest"  // Docker image tag
-        DOCKER_REGISTRY = "docker.io"  // Docker registry
-        KUBE_NAMESPACE = "default"  // Kubernetes namespace
-        DOCKER_PASSWORD = credentials('docker_hub_password')  // Docker Hub password stored in Jenkins Credentials
-        DOCKER_USERNAME = ainakshi
+        DOCKER_IMAGE = "ainakshi/devopsdemo"    // Docker image name
+        DOCKER_TAG = "latest"                  // Docker image tag
+        DOCKER_REGISTRY = "docker.io"          // Docker registry
+        KUBE_NAMESPACE = "default"            // Kubernetes namespace
+        DOCKER_USERNAME = "ainakshi"          // Docker Hub username
+        DOCKER_PASSWORD = credentials('docker_hub_password') // Docker Hub password stored in Jenkins credentials
     }
 
     stages {
         stage('Build') {
             steps {
                 script {
-                    // Build your application (adjust according to your project)
+                    // Build the application
                     sh 'mvn clean install'
                 }
             }
@@ -27,7 +27,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image using the Dockerfile in the current directory
+                    // Build Docker image
                     sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
             }
@@ -36,7 +36,7 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    // Secure login to Docker Hub
+                    // Login to Docker Hub
                     sh """
                         echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
                     """
@@ -56,7 +56,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Create Kubernetes deployment YAML and apply it to the cluster
+                    // Deploy the application to Kubernetes
                     sh """
                         kubectl apply -f - <<EOF
                         apiVersion: apps/v1
@@ -88,10 +88,17 @@ pipeline {
         stage('Expose Kubernetes Service') {
             steps {
                 script {
-                    // Expose the deployment as a service to access the app externally
+                    // Expose the deployment as a service
                     sh """
-                        kubectl expose deployment devopsdemo --type=LoadBalancer --name=devopsdemo-service --port=8080 --target-port=8080 --namespace=${KUBE_NAMESPACE}
+                        kubectl expose deployment devopsdemo \
+                            --type=LoadBalancer \
+                            --name=devopsdemo-service \
+                            --port=8080 \
+                            --target-port=8080 \
+                            --namespace=${KUBE_NAMESPACE}
                     """
                 }
             }
+        }
+    }
 }
