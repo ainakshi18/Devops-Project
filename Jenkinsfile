@@ -10,6 +10,7 @@ pipeline {
         DOCKER_TAG = "latest"                   // Docker image tag
         DOCKER_REGISTRY = "docker.io"           // Docker registry
         KUBE_NAMESPACE = "default"              // Kubernetes namespace
+        KUBECONFIG = credentials('kubeconfig-jenkins')
     }
 
     stages {
@@ -57,9 +58,8 @@ pipeline {
             steps {
                 script {
                     // Apply the Kubernetes Deployment and Service YAML files
-                    sh "kubectl apply -f deployment.yaml --validate=false"
-                    sh "kubectl apply -f service.yaml --validate=false"
-
+                    sh "kubectl apply -f deployment.yaml"
+                    sh "kubectl apply -f service.yaml"
                 }
             }
         }
