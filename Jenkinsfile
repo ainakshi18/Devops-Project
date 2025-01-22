@@ -10,8 +10,6 @@ pipeline {
         DOCKER_TAG = "latest"                  // Docker image tag
         DOCKER_REGISTRY = "docker.io"          // Docker registry
         KUBE_NAMESPACE = "default"            // Kubernetes namespace
-        DOCKER_USERNAME = "ainakshi"          // Docker Hub username
-        DOCKER_PASSWORD = credentials('docker_hub_password') // Docker Hub password stored in Jenkins credentials
     }
 
     stages {
@@ -36,10 +34,12 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    // Login to Docker Hub
-                    sh """
-                        echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
-                    """
+                    // Use credentials to login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: 'docker_hub_password', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        """
+                    }
                 }
             }
         }
