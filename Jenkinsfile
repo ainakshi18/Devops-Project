@@ -11,6 +11,7 @@ pipeline {
         DOCKER_REGISTRY = "docker.io"  // Docker registry
         KUBE_NAMESPACE = "default"  // Kubernetes namespace
         DOCKER_PASSWORD = credentials('docker_hub_password')  // Docker Hub password stored in Jenkins Credentials
+        DOCKER_USERNAME = ainakshi
     }
 
     stages {
@@ -27,18 +28,27 @@ pipeline {
             steps {
                 script {
                     // Build Docker image using the Dockerfile in the current directory
-                    sh "docker build -t ainakshi/devopsdemo."
+                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
             }
         }
+
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    // Secure login to Docker Hub
+                    sh """
+                        echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+                    """
+                }
+            }
+        }
+
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
                     // Push Docker image to Docker Hub
-                    withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
-                    sh 'docker login -u ainakshi -p${dockerhubpwd}'
-                    }
-                    sh 'docker push ainakshi/devopsdemo'
+                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
         }
@@ -84,6 +94,4 @@ pipeline {
                     """
                 }
             }
-        }
-    }
 }
