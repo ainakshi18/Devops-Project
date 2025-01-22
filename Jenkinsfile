@@ -59,27 +59,27 @@ pipeline {
                     // Deploy the application to Kubernetes
                     sh """
                         kubectl apply -f - <<EOF
-                        apiVersion: apps/v1
-                        kind: Deployment
-                        metadata:
-                          name: devopsdemo
-                          namespace: ${KUBE_NAMESPACE}
-                        spec:
-                          replicas: 1
-                          selector:
-                            matchLabels:
-                              app: devopsdemo
-                          template:
-                            metadata:
-                              labels:
-                                app: devopsdemo
-                            spec:
-                              containers:
-                              - name: devopsdemo
-                                image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                                ports:
-                                - containerPort: 8080
-                        EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devopsdemo
+  namespace: ${KUBE_NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devopsdemo
+  template:
+    metadata:
+      labels:
+        app: devopsdemo
+    spec:
+      containers:
+      - name: devopsdemo
+        image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
+        ports:
+        - containerPort: 8080
+EOF
                     """
                 }
             }
