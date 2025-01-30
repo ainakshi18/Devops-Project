@@ -63,21 +63,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Expose Kubernetes Service') {
-            steps {
-                script {
-                    // Expose the deployment as a service (you can skip this step if it's already in your service.yaml)
-                    sh """
-                        kubectl expose deployment devopsdemo \
-                            --type=LoadBalancer \
-                            --name=devopsdemo-service \
-                            --port=8080 \
-                            --target-port=8080 \
-                            --namespace=${KUBE_NAMESPACE}
-                    """
-                }
-            }
-        }
     }
 }
